@@ -1,8 +1,25 @@
+import requests
 
+def get_fsq_places(citybikes_df, url, params, headers):
+    citybikes_df = citybikes_df.copy()
+    params = params.copy()
+    headers = headers.copy()
 
+    cols = ["fsq_id", "cat_id", "cat_name", "lat", "long", "name", "street_address", "zip", "locality", "distance"]
+    fsq_df = pd.DataFrame(columns=cols)
 
-
-
+    i = 0 
+    for index, row in citybikes_df.iterrows():
+        if i == 1:
+            return fsq_parsing
+        else:
+            lat = row['latitude']
+            long = row['longitude']
+            params['ll'] = f'{lat},{long}'
+            response = requests.request("GET", url, params=params, headers=headers)
+            data = response.json()
+            fsq_parsing(data, fsq_df)
+            i += 1
 
 
 
@@ -10,7 +27,7 @@ def fsq_parsing(api_results, blank_df):
 
     '''Takes an iterable API result and blank dataframe that you want to fill out. Currently it's designed for a very specific use-case but can be generalized.'''
     filled_df = blank_df.copy()
-    i = 0
+    i = len(blank_df)
     for place in api_results['results']:
         # fsq_id
         filled_df.loc[i, 'fsq_id'] = place.get('fsq_id', None)
