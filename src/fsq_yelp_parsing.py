@@ -6,30 +6,30 @@ def get_fsq_places(citybikes_df, url, params, headers):
     params = params.copy()
     headers = headers.copy()
 
-    cols = ["fsq_id", "cat_id", "cat_name", "lat", "long", "name", "street_address", "zip", "locality", "distance"]
+    cols = ["reference_bike_stn", "fsq_id", "cat_id", "cat_name", "lat", "long", "name", "street_address", "zip", "locality", "distance"]
     fsq_df = pd.DataFrame(columns=cols)
 
     for index, row in citybikes_df.iterrows():
         lat = row['latitude']
         long = row['longitude']
+        bike_stn_id = row['id']
         params['ll'] = f'{lat},{long}'
-        response = requests.get(url, params=params, headers=headers)  # Use requests.get for clarity
-        if response.status_code == 200:  # Check if the request was successful
+        response = requests.get(url, params=params, headers=headers)  
+        if response.status_code == 200: 
             data = response.json()
-            fsq_df = fsq_parsing(data, fsq_df)
+            fsq_df = fsq_parsing(data, fsq_df, bike_stn_id)
         else:
             pass
-        # Remove break if you want to iterate over all rows in citybikes_df
 
     return fsq_df
 
 
-def fsq_parsing(api_results, blank_df):
+def fsq_parsing(api_results, blank_df, bike_stn_id):
     filled_df = blank_df.copy()
-    for place in api_results['businesses']:
+    for place in api_results['results']:
         i = len(filled_df)
-        # Simplified using direct assignment as index `i` will always refer to the next row
         filled_df.loc[i] = [
+            bike_stn_id,
             place.get('fsq_id', None), place['categories'][0].get('id', None)
             if place['categories'] else None, place['categories'][0].get(
                 'name', None) if place['categories'] else None,
