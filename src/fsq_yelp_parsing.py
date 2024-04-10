@@ -14,8 +14,8 @@ def get_fsq_places(citybikes_df, url, params, headers):
         long = row['longitude']
         bike_stn_id = row['id']
         params['ll'] = f'{lat},{long}'
-        response = requests.get(url, params=params, headers=headers)  
-        if response.status_code == 200: 
+        response = requests.get(url, params=params, headers=headers)
+        if response.status_code == 200:
             data = response.json()
             fsq_df = fsq_parsing(data, fsq_df, bike_stn_id)
         else:
@@ -66,7 +66,7 @@ def get_yelp_places(citybikes_df, url, params, headers):
         params['longitude'] = f'{long}'
         response = requests.get(
             url, params=params,
-            headers=headers)  
+            headers=headers)
         if response.status_code == 200:
             data = response.json()
             yelp_df = yelp_parsing(data, yelp_df, bike_stn_id)
@@ -97,3 +97,10 @@ def yelp_parsing(api_results, blank_df, bike_stn_id):
             place.get('distance', None)
         ]
     return filled_df
+
+
+
+
+def combine_yelp_fsq(fsq_df, yelp_df):
+    combined_df = pd.concat([fsq_df, yelp_df], ignore_index=True)
+    return combined_df
