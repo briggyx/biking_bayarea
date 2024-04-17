@@ -104,3 +104,39 @@ def yelp_parsing(api_results, blank_df, bike_stn_id):
 def combine_yelp_fsq(fsq_df, yelp_df):
     combined_df = pd.concat([fsq_df, yelp_df], ignore_index=True)
     return combined_df
+
+
+
+
+def find_repeat_venues(combined_df):
+    grouped_by_bikestn = combined_df.groupby('reference_bike_stn')
+    repeat_venues = []
+
+    for reference_bike_stn, group_index in grouped_by_bikestn.groups.items():
+        # print("Reference Bike Station:", reference_bike_stn)
+        df = combined_df.loc[group_index]
+        
+        # Initialize a dictionary to store the counts of (name, long, lat) tuples
+        name_counts = {}
+        
+        # Iterate over rows in the group
+        for row in df.itertuples():
+            name = row.name
+            long = row.long
+            lat = row.lat 
+            
+            # Update the count for the current (name, long, lat) tuple
+            venue_tuple = (name, long, lat)
+            if venue_tuple in name_counts:
+                name_counts[venue_tuple] += 1
+            else:
+                name_counts[venue_tuple] = 1
+        
+        # Check for repeated venues and append to repeat_venues list
+        for venue_tuple, count in name_counts.items():
+            if count > 1:
+                # print(venue_tuple, ":", count)
+                repeat_venues.append((reference_bike_stn, venue_tuple[0], venue_tuple[1], venue_tuple[2], count))
+
+    # Return repeat_venues after processing all groups
+    return repeat_venues
